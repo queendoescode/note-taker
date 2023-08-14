@@ -38,9 +38,9 @@ notes.post('/', (req, res) => {
 
         notes.push(newNote);
 
-        const updatedNotes = JSON.stringify(notes, null, 2);
+        const updatedJson = JSON.stringify(notes, null, 2);
 
-        fs.writeFile(databaseFile, updatedNotes, (err) => {
+        fs.writeFile(databaseFile, updatedJson, (err) => {
             if (err) {
               res.status(500).send('Could not update the notes database file');
             } else {
@@ -51,6 +51,36 @@ notes.post('/', (req, res) => {
       }
     }
   )
+});
+
+notes.delete('/:id', (req, res) => {
+  fs.readFile(
+    databaseFile,
+    (err, fileData) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Could not read the notes database file');
+      } else {
+        const notes = JSON.parse(fileData);
+
+        // The ID passed in the route is available in req.params:
+
+        const idToDelete = req.params.id;
+        const filteredNotes = notes.filter(note => note.id !== idToDelete);
+
+        const updatedJson = JSON.stringify(filteredNotes, null, 2);
+
+        fs.writeFile(databaseFile, updatedJson, (err) => {
+            if (err) {
+              res.status(500).send('Could not update the notes database file');
+            } else {
+              res.status(201).json([]);
+            }
+          }
+        );
+      }
+    }
+  );
 });
 
 module.exports = notes;
